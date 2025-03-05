@@ -1,0 +1,17 @@
+04:19:42 **** Incremental Build of configuration Debug for project W01-RTOS_LED ****
+make -j20 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32L475xx -c -I../Core/Inc -IC:/Users/choua/STM32Cube/Repository/STM32Cube_FW_L4_V1.18.1/Drivers/STM32L4xx_HAL_Driver/Inc -IC:/Users/choua/STM32Cube/Repository/STM32Cube_FW_L4_V1.18.1/Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -IC:/Users/choua/STM32Cube/Repository/STM32Cube_FW_L4_V1.18.1/Drivers/CMSIS/Device/ST/STM32L4xx/Include -IC:/Users/choua/STM32Cube/Repository/STM32Cube_FW_L4_V1.18.1/Drivers/CMSIS/Include -IC:/Users/choua/STM32Cube/Repository/STM32Cube_FW_L4_V1.18.1/Middlewares/Third_Party/FreeRTOS/Source/include -IC:/Users/choua/STM32Cube/Repository/STM32Cube_FW_L4_V1.18.1/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -IC:/Users/choua/STM32Cube/Repository/STM32Cube_FW_L4_V1.18.1/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+arm-none-eabi-gcc -o "W01-RTOS_LED.elf" @"objects.list"   -mcpu=cortex-m4 -T"D:\113-2\embedded_system\projects\W01-RTOS_LED\STM32L475VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="W01-RTOS_LED.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: W01-RTOS_LED.elf
+ 
+arm-none-eabi-size  W01-RTOS_LED.elf 
+arm-none-eabi-objdump -h -S W01-RTOS_LED.elf  > "W01-RTOS_LED.list"
+   text	   data	    bss	    dec	    hex	filename
+  35916	    104	  13224	  49244	   c05c	W01-RTOS_LED.elf
+Finished building: default.size.stdout
+ 
+Finished building: W01-RTOS_LED.list
+ 
+
+04:19:43 Build Finished. 0 errors, 0 warnings. (took 1s.316ms)
+

@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -80,6 +80,18 @@ const osThreadAttr_t fastBlink_attributes = {
   .stack_size = sizeof(fastBlinkBuffer),
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for blink5 */
+osThreadId_t blink5Handle;
+uint32_t blink5Buffer[ 128 ];
+osStaticThreadDef_t blink5ControlBlock;
+const osThreadAttr_t blink5_attributes = {
+  .name = "blink5",
+  .cb_mem = &blink5ControlBlock,
+  .cb_size = sizeof(blink5ControlBlock),
+  .stack_mem = &blink5Buffer[0],
+  .stack_size = sizeof(blink5Buffer),
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for LED2 */
 osMutexId_t LED2Handle;
 osStaticMutexDef_t LED2ControlBlock;
@@ -104,6 +116,7 @@ static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
 void StartDefaultTask(void *argument);
 void StartFastBlink(void *argument);
+void StartBlink5(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -111,7 +124,8 @@ void StartFastBlink(void *argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int status_code = 1;
+char msg[128] = "init message";
 /* USER CODE END 0 */
 
 /**
@@ -122,7 +136,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+  strcpy(msg, "main start");
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -131,7 +145,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  strcpy(msg, "after HAL_Init");
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -183,8 +197,12 @@ int main(void)
   /* creation of fastBlink */
   fastBlinkHandle = osThreadNew(StartFastBlink, NULL, &fastBlink_attributes);
 
+  /* creation of blink5 */
+  blink5Handle = osThreadNew(StartBlink5, NULL, &blink5_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   osThreadSuspend(fastBlinkHandle);
+  osThreadSuspend(blink5Handle);
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
@@ -201,6 +219,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    break;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -724,6 +743,14 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if(GPIO_Pin == BUTTON_EXTI13_Pin)
+  {
+    strcpy(msg, "button pressed");
+    osThreadResume(blink5Handle);
+  }
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -739,9 +766,11 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
+    osMutexAcquire(LED2Handle, 10);
     osThreadResume(fastBlinkHandle);
     osDelay(2000);
     osThreadSuspend(fastBlinkHandle);
+    osMutexRelease(LED2Handle);
     osDelay(8000);
   }
   /* USER CODE END 5 */
@@ -764,6 +793,49 @@ void StartFastBlink(void *argument)
     osDelay(50);
   }
   /* USER CODE END StartFastBlink */
+}
+
+/* USER CODE BEGIN Header_StartBlink5 */
+/**
+* @brief Function implementing the blink5 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartBlink5 */
+void StartBlink5(void *argument)
+{
+  /* USER CODE BEGIN StartBlink5 */
+  /* Infinite loop */
+  status_code = osMutexAcquire(LED2Handle, 10);
+  if(status_code != osOK)
+  {
+    strcpy(msg, "mutex acquire failed");
+    osThreadSuspend(blink5Handle);
+  }
+  strcpy(msg, "mutex acquired");
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+  osDelay(500);
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+  osDelay(500);
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+  osDelay(500);
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+  osDelay(500);
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+  osDelay(500);
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+  osDelay(500);
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+  osDelay(500);
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+  osDelay(500);
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+  osDelay(500);
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+  osDelay(500);
+  osMutexRelease(LED2Handle);
+  osThreadSuspend(blink5Handle);
+  /* USER CODE END StartBlink5 */
 }
 
 /**
