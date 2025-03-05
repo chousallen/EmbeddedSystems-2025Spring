@@ -161,6 +161,7 @@ void startBtnMT(void *argument);
 int button = 0;
 int short_press = -1, long_press = -1;
 int routine_acquire = 1, btn_acquire = 1;
+int test = -1;
 /* USER CODE END 0 */
 
 /**
@@ -808,7 +809,8 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(100);
+	test = HAL_GPIO_ReadPin(BUTTON_EXTI13_GPIO_Port, BUTTON_EXTI13_Pin);
+    osDelay(1);
   }
   /* USER CODE END 5 */
 }
@@ -941,7 +943,8 @@ void startBtnMT(void *argument)
     	for(int millis = 0; millis < 1000; millis+=1)
     	{
     		osDelay(1);
-    		if(HAL_GPIO_ReadPin(LED2_GPIO_Port, LED2_Pin) == 1)
+
+    		if(HAL_GPIO_ReadPin(BUTTON_EXTI13_GPIO_Port, BUTTON_EXTI13_Pin) == 1)
     		{
     			short_press = 1;
     			is_short = 1;
@@ -949,7 +952,9 @@ void startBtnMT(void *argument)
     		}
     	}
     	if(is_short == 0)
+    	{
     		long_press = 1;
+    	}
     }
     osDelay(1);
   }
