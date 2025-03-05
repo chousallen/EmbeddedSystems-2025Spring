@@ -75,16 +75,16 @@ const osThreadAttr_t fastBlk_attributes = {
   .stack_size = sizeof(fastBlkBuffer),
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for fastMT */
-osThreadId_t fastMTHandle;
-uint32_t fastMTBuffer[ 128 ];
-osStaticThreadDef_t fastMTControlBlock;
-const osThreadAttr_t fastMT_attributes = {
-  .name = "fastMT",
-  .cb_mem = &fastMTControlBlock,
-  .cb_size = sizeof(fastMTControlBlock),
-  .stack_mem = &fastMTBuffer[0],
-  .stack_size = sizeof(fastMTBuffer),
+/* Definitions for routineMT */
+osThreadId_t routineMTHandle;
+uint32_t routineMTBuffer[ 128 ];
+osStaticThreadDef_t routineMTControlBlock;
+const osThreadAttr_t routineMT_attributes = {
+  .name = "routineMT",
+  .cb_mem = &routineMTControlBlock,
+  .cb_size = sizeof(routineMTControlBlock),
+  .stack_mem = &routineMTBuffer[0],
+  .stack_size = sizeof(routineMTBuffer),
   .priority = (osPriority_t) osPriorityBelowNormal,
 };
 /* Definitions for slowBlk */
@@ -99,17 +99,29 @@ const osThreadAttr_t slowBlk_attributes = {
   .stack_size = sizeof(slowBlkBuffer),
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for slowMT */
-osThreadId_t slowMTHandle;
-uint32_t slowMTBuffer[ 128 ];
-osStaticThreadDef_t slowMTControlBlock;
-const osThreadAttr_t slowMT_attributes = {
-  .name = "slowMT",
-  .cb_mem = &slowMTControlBlock,
-  .cb_size = sizeof(slowMTControlBlock),
-  .stack_mem = &slowMTBuffer[0],
-  .stack_size = sizeof(slowMTBuffer),
+/* Definitions for btnBlkMT */
+osThreadId_t btnBlkMTHandle;
+uint32_t btnBlkMTBuffer[ 128 ];
+osStaticThreadDef_t btnBlkMTControlBlock;
+const osThreadAttr_t btnBlkMT_attributes = {
+  .name = "btnBlkMT",
+  .cb_mem = &btnBlkMTControlBlock,
+  .cb_size = sizeof(btnBlkMTControlBlock),
+  .stack_mem = &btnBlkMTBuffer[0],
+  .stack_size = sizeof(btnBlkMTBuffer),
   .priority = (osPriority_t) osPriorityBelowNormal,
+};
+/* Definitions for btnMT */
+osThreadId_t btnMTHandle;
+uint32_t btnMTBuffer[ 128 ];
+osStaticThreadDef_t btnMTControlBlock;
+const osThreadAttr_t btnMT_attributes = {
+  .name = "btnMT",
+  .cb_mem = &btnMTControlBlock,
+  .cb_size = sizeof(btnMTControlBlock),
+  .stack_mem = &btnMTBuffer[0],
+  .stack_size = sizeof(btnMTBuffer),
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for LED2_Mutex */
 osMutexId_t LED2_MutexHandle;
@@ -135,9 +147,10 @@ static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
 void StartDefaultTask(void *argument);
 void startFastBlk(void *argument);
-void startFastMT(void *argument);
+void startRoutineMT(void *argument);
 void startSlowBlk(void *argument);
-void startSlowMT(void *argument);
+void startBtnBlkMT(void *argument);
+void startBtnMT(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -146,7 +159,8 @@ void startSlowMT(void *argument);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int button = 0;
-int fast_status = 1, slow_status = 1;
+int short_press = -1, long_press = -1;
+int routine_acquire = 1, btn_acquire = 1;
 /* USER CODE END 0 */
 
 /**
@@ -218,14 +232,17 @@ int main(void)
   /* creation of fastBlk */
   fastBlkHandle = osThreadNew(startFastBlk, NULL, &fastBlk_attributes);
 
-  /* creation of fastMT */
-  fastMTHandle = osThreadNew(startFastMT, NULL, &fastMT_attributes);
+  /* creation of routineMT */
+  routineMTHandle = osThreadNew(startRoutineMT, NULL, &routineMT_attributes);
 
   /* creation of slowBlk */
   slowBlkHandle = osThreadNew(startSlowBlk, NULL, &slowBlk_attributes);
 
-  /* creation of slowMT */
-  slowMTHandle = osThreadNew(startSlowMT, NULL, &slowMT_attributes);
+  /* creation of btnBlkMT */
+  btnBlkMTHandle = osThreadNew(startBtnBlkMT, NULL, &btnBlkMT_attributes);
+
+  /* creation of btnMT */
+  btnMTHandle = osThreadNew(startBtnMT, NULL, &btnMT_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -791,7 +808,7 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osDelay(100);
   }
   /* USER CODE END 5 */
 }
@@ -815,32 +832,32 @@ void startFastBlk(void *argument)
   /* USER CODE END startFastBlk */
 }
 
-/* USER CODE BEGIN Header_startFastMT */
+/* USER CODE BEGIN Header_startRoutineMT */
 /**
-* @brief Function implementing the fastMT thread.
+* @brief Function implementing the routineMT thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_startFastMT */
-void startFastMT(void *argument)
+/* USER CODE END Header_startRoutineMT */
+void startRoutineMT(void *argument)
 {
-  /* USER CODE BEGIN startFastMT */
+  /* USER CODE BEGIN startRoutineMT */
   /* Infinite loop */
   for(;;)
   {
-	fast_status = osMutexAcquire(LED2_MutexHandle, 1);
-	if(fast_status == osOK)
-	{
-		osThreadResume(fastBlkHandle);
-		osDelay(2000);
-		osThreadSuspend(fastBlkHandle);
-		osMutexRelease(LED2_MutexHandle);
-		osDelay(8000);
-	}
-	else
-		osDelay(10000);
+    routine_acquire = osMutexAcquire(LED2_MutexHandle, 1);
+    if(routine_acquire == osOK)
+    {
+    	osThreadResume(fastBlkHandle);
+    	osDelay(2000);
+    	osThreadSuspend(fastBlkHandle);
+    	osMutexRelease(LED2_MutexHandle);
+    	osDelay(8000);
+    }
+    else
+    	osDelay(10000);
   }
-  /* USER CODE END startFastMT */
+  /* USER CODE END startRoutineMT */
 }
 
 /* USER CODE BEGIN Header_startSlowBlk */
@@ -862,37 +879,81 @@ void startSlowBlk(void *argument)
   /* USER CODE END startSlowBlk */
 }
 
-/* USER CODE BEGIN Header_startSlowMT */
+/* USER CODE BEGIN Header_startBtnBlkMT */
 /**
-* @brief Function implementing the slowMT thread.
+* @brief Function implementing the btnBlkMT thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_startSlowMT */
-void startSlowMT(void *argument)
+/* USER CODE END Header_startBtnBlkMT */
+void startBtnBlkMT(void *argument)
 {
-  /* USER CODE BEGIN startSlowMT */
+  /* USER CODE BEGIN startBtnBlkMT */
+  /* Infinite loop */
+  for(;;)
+  {
+	  if(long_press > 0)
+	  {
+		  long_press = 0;
+		  btn_acquire = osMutexAcquire(LED2_MutexHandle, 1);
+		  if(btn_acquire == osOK)
+		  {
+			  osThreadResume(fastBlkHandle);
+			  osDelay(5000);
+			  osThreadSuspend(fastBlkHandle);
+			  osMutexRelease(LED2_MutexHandle);
+		  }
+	  }
+	  if(short_press > 0)
+	  {
+		  short_press = 0;
+		  btn_acquire = osMutexAcquire(LED2_MutexHandle, 1);
+		  if(btn_acquire == osOK)
+		  {
+			  osThreadResume(slowBlkHandle);
+			  osDelay(5000);
+			  osThreadSuspend(slowBlkHandle);
+			  osMutexRelease(LED2_MutexHandle);
+		  }
+	  }
+    osDelay(10);
+  }
+  /* USER CODE END startBtnBlkMT */
+}
+
+/* USER CODE BEGIN Header_startBtnMT */
+/**
+* @brief Function implementing the btnMT thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_startBtnMT */
+void startBtnMT(void *argument)
+{
+  /* USER CODE BEGIN startBtnMT */
   /* Infinite loop */
   for(;;)
   {
     if(button > 0)
     {
     	button = 0;
-    	slow_status = osMutexAcquire(LED2_MutexHandle, 1);
-    	if(slow_status == osOK)
+    	int is_short = 0;
+    	for(int millis = 0; millis < 1000; millis+=1)
     	{
-    		osThreadResume(slowBlkHandle);
-    		osDelay(5000);
-    		osThreadSuspend(slowBlkHandle);
-    		osMutexRelease(LED2_MutexHandle);
+    		osDelay(1);
+    		if(HAL_GPIO_ReadPin(LED2_GPIO_Port, LED2_Pin) == 1)
+    		{
+    			short_press = 1;
+    			is_short = 1;
+    			break ;
+    		}
     	}
+    	if(is_short == 0)
+    		long_press = 1;
     }
-    else
-    {
-    	osDelay(10);
-    }
+    osDelay(1);
   }
-  /* USER CODE END startSlowMT */
+  /* USER CODE END startBtnMT */
 }
 
 /**
