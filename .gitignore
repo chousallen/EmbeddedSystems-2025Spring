@@ -3,3 +3,6 @@
 **/build/
 **/Drivers/
 **/Middlewares/
+.metadata/*
+**/Debug/
+**/.settings/
