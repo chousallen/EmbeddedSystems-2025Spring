@@ -23,11 +23,11 @@
 #define TERMINAL_USE
 
 /* Update SSID and PASSWORD with own Access point settings */
-#define SSID     "sweethome"
-#define PASSWORD "wasleyvicky"
+#define SSID     "MySSID"
+#define PASSWORD "MyPasswd"
 
-uint8_t RemoteIP[] = {192,168,0,141};
-#define RemotePORT	8080
+uint8_t RemoteIP[] = {192,168,3,110};
+#define RemotePORT	8002
 
 #define WIFI_WRITE_TIMEOUT 10000
 #define WIFI_READ_TIMEOUT  10000
