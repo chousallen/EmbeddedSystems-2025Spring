@@ -31,16 +31,16 @@ static ES_WIFIObject_t EsWifiObj;
   * @param  None
   * @retval Operation status
   */
-WIFI_Status_t WIFI_Init(void)
+WIFI_Status_t WIFI_Init()
 {
   WIFI_Status_t ret = WIFI_STATUS_ERROR;
 
   if(ES_WIFI_RegisterBusIO(&EsWifiObj,
-                           SPI_WIFI_Init,
-                           SPI_WIFI_DeInit,
-                           SPI_WIFI_Delay,
-                           SPI_WIFI_SendData,
-                           SPI_WIFI_ReceiveData) == ES_WIFI_STATUS_OK)
+          SPI_WIFI_Init,
+          SPI_WIFI_DeInit,
+          SPI_WIFI_Delay,
+          SPI_WIFI_SendData,
+          SPI_WIFI_ReceiveData) == ES_WIFI_STATUS_OK)
   {
     if(ES_WIFI_Init(&EsWifiObj) == ES_WIFI_STATUS_OK)
     {

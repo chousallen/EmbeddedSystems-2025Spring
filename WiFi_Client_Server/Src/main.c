@@ -105,11 +105,6 @@ int main(void)
   BSP_COM_Init(COM1, &hDiscoUart);
 #endif /* TERMINAL_USE */
 
-  for(int i=0; i<10; i++)
-  {
-	  BSP_LED_Toggle(LED2);
-  }
-
   TERMOUT("****** WIFI Module in TCP Client mode demonstration ****** \n\n");
   TERMOUT("TCP Client Instructions :\n");
   TERMOUT("1- Make sure your Phone is connected to the same network that\n");

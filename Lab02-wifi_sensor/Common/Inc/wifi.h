@@ -116,7 +116,7 @@ typedef struct {
 
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-WIFI_Status_t WIFI_Init(void);
+WIFI_Status_t WIFI_Init();
 WIFI_Status_t WIFI_ListAccessPoints(WIFI_APs_t *APs, uint8_t AP_MaxNbr);
 WIFI_Status_t WIFI_Connect(const char *SSID, const char *Password, WIFI_Ecn_t ecn);
 WIFI_Status_t WIFI_GetIP_Address(uint8_t *ipaddr, uint8_t IpAddrLength);
