@@ -23,11 +23,11 @@
 #define TERMINAL_USE
 
 /* Update SSID and PASSWORD with own Access point settings */
-#define SSID     "MySSID"
-#define PASSWORD "MyPasswd"
+#define SSID     "makerspace-2.4G"
+#define PASSWORD "ntueemakerspace"
 
-uint8_t RemoteIP[] = {192,168,3,110};
-#define RemotePORT	8002
+uint8_t RemoteIP[] = {192,168,10,17};
+#define RemotePORT	8080
 
 #define WIFI_WRITE_TIMEOUT 10000
 #define WIFI_READ_TIMEOUT  10000
@@ -105,12 +105,17 @@ int main(void)
   BSP_COM_Init(COM1, &hDiscoUart);
 #endif /* TERMINAL_USE */
 
+  for(int i=0; i<10; i++)
+  {
+	  BSP_LED_Toggle(LED2);
+  }
+
   TERMOUT("****** WIFI Module in TCP Client mode demonstration ****** \n\n");
   TERMOUT("TCP Client Instructions :\n");
   TERMOUT("1- Make sure your Phone is connected to the same network that\n");
   TERMOUT("   you configured using the Configuration Access Point.\n");
   TERMOUT("2- Create a server by using the android application TCP Server\n");
-  TERMOUT("   with port(8002).\n");
+  TERMOUT("   with port(8080).\n");
   TERMOUT("3- Get the Network Name or IP Address of your Android from the step 2.\n\n");
 
 
