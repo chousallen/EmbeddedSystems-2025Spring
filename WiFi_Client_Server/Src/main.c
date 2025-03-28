@@ -26,11 +26,14 @@
 #define SSID     "sallen"
 #define PASSWORD "b0c6d1e3"
 
-uint8_t RemoteIP[] = {192,168,185,209};
+uint8_t interrupt = 0;
+uint8_t button = -1;
+
+uint8_t RemoteIP[] = {192,168,10,13};
 #define RemotePORT	8080
 
-#define WIFI_WRITE_TIMEOUT 10000
-#define WIFI_READ_TIMEOUT  1000
+#define WIFI_WRITE_TIMEOUT 100
+#define WIFI_READ_TIMEOUT  100
 
 #define CONNECTION_TRIAL_MAX          10
 
@@ -91,6 +94,9 @@ int main(void)
   SystemClock_Config();
   /* Configure LED2 */
   BSP_LED_Init(LED2);
+
+  BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
+
 
 #if defined (TERMINAL_USE)
   /* Initialize all configured peripherals */
@@ -195,6 +201,7 @@ int main(void)
 
   while(1)
   {
+	button = BSP_PB_GetState(BUTTON_USER);
     if(Socket != -1)
     {
       ret = WIFI_ReceiveData(Socket, RxData, sizeof(RxData)-1, &Datalen, WIFI_READ_TIMEOUT);
@@ -335,6 +342,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
       SPI_WIFI_ISR();
       break;
     }
+    case (GPIO_PIN_13):
+	{
+    	BSP_LED_Toggle(LED2);
+    	interrupt = 1 - interrupt;
+    	break;
+	}
     default:
     {
       break;
