@@ -35,6 +35,7 @@
 #define SSID     "sallen"
 #define PASSWORD "b0c6d1e3"
 
+uint8_t button = 0;
 uint8_t wifi_status = -1;
 uint8_t RemoteIP[] = {192,168,185,242};
 #define RemotePORT	8080
@@ -591,6 +592,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
       SPI_WIFI_ISR();
       break;
     }
+    case (GPIO_PIN_13):
+	{
+    	button = 1;
+    	break;
+	}
     default:
     {
       break;
