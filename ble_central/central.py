@@ -1,38 +1,51 @@
 import asyncio
 from bleak import BleakScanner, BleakClient
 
+# Define the target device name and the 16-bit service UUID
+TARGET_DEVICE_NAME = "Ping"  # Replace with your device's name
+SERVICE_UUID_16_BIT = "abcd"           # Replace with your 16-bit service UUID
+
+async def notification_handler(sender, data):
+    print(f"Notification from {sender}: {data}")
+
 async def main():
-    print("🔍 Scanning for BLE devices...")
-    devices = await BleakScanner.discover(timeout=5)
+    # Step 1: Scan for the device by name.
+    print(f"Scanning for device with name: {TARGET_DEVICE_NAME}...")
+    device = await BleakScanner.find_device_by_name(TARGET_DEVICE_NAME, timeout=10.0)
 
-    for i, device in enumerate(devices):
-        print(f"[{i}] {device.name} ({device.address})")
-
-    if not devices:
-        print("No BLE devices found.")
+    if not device:
+        print(f"Device with name '{TARGET_DEVICE_NAME}' not found.")
         return
 
-    # Select the device with the name "eslab-pi"
-    device_name = "Allen's A55"
-    selected_device = next((device for device in devices if device.name == device_name), None)
-    if not selected_device:
-        print(f"\n❌ Device with name {device_name} not found.")
-        return
-    print(f"\n🔗 Connecting to {selected_device.name} ({selected_device.address})...")
+    print(f"Found device: {device.name} [{device.address}]")
 
-    async with BleakClient(selected_device.address) as client:
-        connected = await client.is_connected()
-        print(f"✅ Connected: {connected}")
+    # Connect to the device.
+    async with BleakClient(device) as client:
+        print(f"Connected to {device.name}")
 
-        # List services and characteristics
-        print("\n📡 Services:")
-        for service in client.services:
-            print(f"{service.uuid}:")
-            for char in service.characteristics:
-                print(f"  └─ {char.uuid} (properties: {char.properties})")
+        # Step 2: Retrieve and print all services.
+        services = await client.get_services()
+        print("Services:")
+        for service in services:
+            print(f"  [Service] {service.uuid}")
+        
+        # Step 3: Select the service with the specified 16-bit UUID.
+        service_uuid = f"0000{SERVICE_UUID_16_BIT}-0000-1000-8000-00805f9b34fb"
+        service = services.get_service(service_uuid)
+        if not service:
+            print(f"Service with UUID {service_uuid} not found.")
+            return
 
-        # Example: read a characteristic (change UUID to one from above)
-        # data = await client.read_gatt_char(0x181c)
-        # print("📥 Data:", data)
+        print(f"Found service: {service.uuid}")
 
-asyncio.run(main())
+        # Instead of directly writing to the CCCD, use start_notify for the desired characteristic.
+        # Replace `characteristic_uuid` with the UUID of the characteristic you wish to monitor.
+        characteristic_uuid = "1234"  # Set this to your target characteristic UUID
+        await client.start_notify(characteristic_uuid, notification_handler)
+        print("Notifications enabled via start_notify.")
+
+        # Keep the program running to receive notifications.
+        await asyncio.sleep(30)
+
+if __name__ == "__main__":
+    asyncio.run(main())
