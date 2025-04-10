@@ -23,17 +23,19 @@
 #define TERMINAL_USE
 
 /* Update SSID and PASSWORD with own Access point settings */
-#define SSID     "sallen"
-#define PASSWORD "b0c6d1e3"
+#define SSID     "makerspace-2.4G"
+#define PASSWORD "ntueemakerspace"
 
-uint8_t interrupt = 0;
-uint8_t button = -1;
+int time = 0;
+int16_t accel_data[3];
 
-uint8_t RemoteIP[] = {192,168,10,13};
+char TxData[32];
+
+uint8_t RemoteIP[] = {192,168,10,193};
 #define RemotePORT	8080
 
-#define WIFI_WRITE_TIMEOUT 100
-#define WIFI_READ_TIMEOUT  100
+#define WIFI_WRITE_TIMEOUT 0
+#define WIFI_READ_TIMEOUT  10000
 
 #define CONNECTION_TRIAL_MAX          10
 
@@ -74,14 +76,10 @@ extern  SPI_HandleTypeDef hspi;
   * @param  None
   * @retval None
   */
-int count = 0;
-char msg[32];
-
 int main(void)
 {
   uint8_t  MAC_Addr[6] = {0};
   uint8_t  IP_Addr[4] = {0};
-  uint8_t TxData[] = "STM32 : Hello!\n";
   int32_t Socket = -1;
   uint16_t Datalen;
   int32_t ret;
@@ -94,9 +92,6 @@ int main(void)
   SystemClock_Config();
   /* Configure LED2 */
   BSP_LED_Init(LED2);
-
-  BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
-
 
 #if defined (TERMINAL_USE)
   /* Initialize all configured peripherals */
@@ -114,12 +109,17 @@ int main(void)
   BSP_COM_Init(COM1, &hDiscoUart);
 #endif /* TERMINAL_USE */
 
+  if(BSP_ACCELERO_Init()==ACCELERO_OK)
+	  TERMOUT("Accelerometer init success!\n");
+  else
+	  TERMOUT("Accelerometer init failed\n");
+
   TERMOUT("****** WIFI Module in TCP Client mode demonstration ****** \n\n");
   TERMOUT("TCP Client Instructions :\n");
   TERMOUT("1- Make sure your Phone is connected to the same network that\n");
   TERMOUT("   you configured using the Configuration Access Point.\n");
   TERMOUT("2- Create a server by using the android application TCP Server\n");
-  TERMOUT("   with port(8002).\n");
+  TERMOUT("   with port(8080).\n");
   TERMOUT("3- Get the Network Name or IP Address of your Android from the step 2.\n\n");
 
 
@@ -194,45 +194,39 @@ int main(void)
     TERMOUT("> ERROR : WIFI Module cannot be initialized.\n");
     BSP_LED_On(LED2);
   }
-  BSP_ACCELERO_Init();
-  int16_t pDataXYZ[3];
-  BSP_ACCELERO_AccGetXYZ(pDataXYZ);
-//  TERMOUT("%d \n", pDataXYZ[0]);
 
   while(1)
   {
-	button = BSP_PB_GetState(BUTTON_USER);
+	  BSP_ACCELERO_AccGetXYZ(accel_data);
+	  sprintf(TxData, "%d,%d,%d,%d\n", ++time, accel_data[0], accel_data[1], accel_data[2]);
     if(Socket != -1)
     {
-      ret = WIFI_ReceiveData(Socket, RxData, sizeof(RxData)-1, &Datalen, WIFI_READ_TIMEOUT);
+    	TERMOUT(TxData);
+    	WIFI_SendData(Socket, TxData, sizeof(TxData)-1, (uint16_t)30, WIFI_WRITE_TIMEOUT);
+      /*
+    	ret = WIFI_ReceiveData(Socket, RxData, sizeof(RxData)-1, &Datalen, WIFI_READ_TIMEOUT);
       if(ret == WIFI_STATUS_OK)
       {
         if(Datalen > 0)
         {
           RxData[Datalen]=0;
           TERMOUT("Received: %s\n",RxData);
-//          ret = WIFI_SendData(Socket, TxData, sizeof(TxData), &Datalen, WIFI_WRITE_TIMEOUT);
+          ret = WIFI_SendData(Socket, TxData, sizeof(TxData), &Datalen, WIFI_WRITE_TIMEOUT);
           if (ret != WIFI_STATUS_OK)
           {
             TERMOUT("> ERROR : Failed to Send Data, connection closed\n");
             break;
           }
         }
-//        ret = WIFI_SendData(Socket, TxData, sizeof(TxData), &Datalen, WIFI_WRITE_TIMEOUT);
-        BSP_ACCELERO_AccGetXYZ(pDataXYZ);
-        ++count;
-//        if(count == 100) count = 0;
-        TERMOUT("received data: %d, %d, %d \n", pDataXYZ[0], pDataXYZ[1], pDataXYZ[2]);
-        sprintf(msg, "%d , %d , %d , %d \n", count, pDataXYZ[0], pDataXYZ[1], pDataXYZ[2]);
-        ret = WIFI_SendData(Socket, msg, sizeof(msg), &Datalen, WIFI_WRITE_TIMEOUT);
-        HAL_Delay(100);
       }
       else
       {
         TERMOUT("> ERROR : Failed to Receive Data, connection closed\n");
         break;
       }
+      */
     }
+    HAL_Delay(500);
   }
 }
 
@@ -342,12 +336,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
       SPI_WIFI_ISR();
       break;
     }
-    case (GPIO_PIN_13):
-	{
-    	BSP_LED_Toggle(LED2);
-    	interrupt = 1 - interrupt;
-    	break;
-	}
     default:
     {
       break;

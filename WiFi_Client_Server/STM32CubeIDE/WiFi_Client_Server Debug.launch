@@ -34,7 +34,7 @@
     <booleanAttribute key="com.st.stm32cube.ide.mcu.debug.stlink.enable_shared_stlink" value="false"/>
     <stringAttribute key="com.st.stm32cube.ide.mcu.debug.stlink.frequency" value="0"/>
     <booleanAttribute key="com.st.stm32cube.ide.mcu.debug.stlink.halt_all_on_reset" value="false"/>
-    <stringAttribute key="com.st.stm32cube.ide.mcu.debug.stlink.log_file" value="C:\Users\User\STM32Cube\Repository\STM32Cube_FW_L4_V1.18.1\Projects\B-L475E-IOT01A\Applications\WiFi\WiFi_Client_Server\STM32CubeIDE\Debug\st-link_gdbserver_log.txt"/>
+    <stringAttribute key="com.st.stm32cube.ide.mcu.debug.stlink.log_file" value="D:\113-2\embedded_system\EmbeddedSystems-2025Spring\WiFi_Client_Server\STM32CubeIDE\Debug\st-link_gdbserver_log.txt"/>
     <stringAttribute key="com.st.stm32cube.ide.mcu.debug.stlink.low_power_debug" value="enable"/>
     <stringAttribute key="com.st.stm32cube.ide.mcu.debug.stlink.max_halt_delay" value="2"/>
     <stringAttribute key="com.st.stm32cube.ide.mcu.debug.stlink.reset_strategy" value="connect_under_reset"/>
