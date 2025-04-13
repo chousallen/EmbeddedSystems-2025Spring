@@ -29,6 +29,8 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
 
+#include "hci_tl_interface.h"
+#include "b_l475e_iot01a2.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -69,9 +71,7 @@ void Error_Handler(void);
 #define SPBTLE_RF_IRQ_EXTI6_Pin GPIO_PIN_6
 #define SPBTLE_RF_IRQ_EXTI6_GPIO_Port GPIOE
 #define SPBTLE_RF_IRQ_EXTI6_EXTI_IRQn EXTI9_5_IRQn
-#define BUTTON_EXTI13_Pin GPIO_PIN_13
-#define BUTTON_EXTI13_GPIO_Port GPIOC
-#define BUTTON_EXTI13_EXTI_IRQn EXTI15_10_IRQn
+#define BSP_BUTTON_EXTI_IRQn EXTI15_10_IRQn
 #define ARD_A5_Pin GPIO_PIN_0
 #define ARD_A5_GPIO_Port GPIOC
 #define ARD_A4_Pin GPIO_PIN_1
@@ -164,8 +164,6 @@ void Error_Handler(void);
 #define LSM3MDL_DRDY_EXTI8_Pin GPIO_PIN_8
 #define LSM3MDL_DRDY_EXTI8_GPIO_Port GPIOC
 #define LSM3MDL_DRDY_EXTI8_EXTI_IRQn EXTI9_5_IRQn
-#define LED3_WIFI__LED4_BLE_Pin GPIO_PIN_9
-#define LED3_WIFI__LED4_BLE_GPIO_Port GPIOC
 #define SPBTLE_RF_RST_Pin GPIO_PIN_8
 #define SPBTLE_RF_RST_GPIO_Port GPIOA
 #define USB_OTG_FS_VBUS_Pin GPIO_PIN_9
