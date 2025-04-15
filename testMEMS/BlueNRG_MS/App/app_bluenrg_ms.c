@@ -37,8 +37,7 @@
 #include "stm32l4xx_hal_tim.h"
 
 /* USER CODE BEGIN Includes */
-#include "role_type.h"
-#include "main.h"
+
 /* USER CODE END Includes */
 
 /* Private defines -----------------------------------------------------------*/
@@ -72,10 +71,11 @@ static volatile uint8_t user_button_pressed = 0;
 static void User_Process(void);
 static void User_Init(void);
 static void Set_Random_Environmental_Values(float *data_t, float *data_p);
-static void Set_ACC_Values(uint32_t cnt);
+static void Set_Random_Motion_Values(uint32_t cnt);
 static void Reset_Motion_Values(void);
 
 /* USER CODE BEGIN PFP */
+
 /* USER CODE END PFP */
 
 #if PRINT_CSV_FORMAT
@@ -198,7 +198,7 @@ void MX_BlueNRG_MS_Init(void)
   if(ret == BLE_STATUS_SUCCESS) {
      PRINTF("BlueMS SW service added successfully.\n");
   } else {
-     PRINTF("Error while adding BlueMS SW service: 0x%02x\r\n", ret);
+     PRINTF("Error while adding BlueMS HW service: 0x%02x\r\n", ret);
      while(1);
   }
 
@@ -285,7 +285,7 @@ static void User_Process(void)
       BlueMS_Environmental_Update((int32_t)(data_p *100), (int16_t)(data_t * 10));
 
       /* Update emulated Acceleration, Gyroscope and Sensor Fusion data */
-      Set_ACC_Values(counter);
+      Set_Random_Motion_Values(counter);
       Acc_Update(&x_axes, &g_axes, &m_axes);
       Quat_Update(&q_axes);
 
@@ -295,7 +295,7 @@ static void User_Process(void)
         Reset_Motion_Values();
       }
 #if !USE_BUTTON
-      //HAL_Delay(1000); /* wait 1 sec before sending new data */
+      HAL_Delay(1000); /* wait 1 sec before sending new data */
 #endif
     }
 #if USE_BUTTON
@@ -322,13 +322,13 @@ static void Set_Random_Environmental_Values(float *data_t, float *data_p)
  * @param  uint32_t counter for changing the rotation direction
  * @retval None
  */
-static void Set_ACC_Values(uint32_t cnt)
+static void Set_Random_Motion_Values(uint32_t cnt)
 {
   /* Update Acceleration, Gyroscope and Sensor Fusion data */
   if (cnt < 20) {
-    x_axes.AXIS_X = acc_data[0];
-    x_axes.AXIS_Y = acc_data[1];
-    x_axes.AXIS_Z = acc_data[2];
+    x_axes.AXIS_X +=  (10  + ((uint64_t)rand()*3*cnt)/RAND_MAX);
+    x_axes.AXIS_Y += -(10  + ((uint64_t)rand()*5*cnt)/RAND_MAX);
+    x_axes.AXIS_Z +=  (10  + ((uint64_t)rand()*7*cnt)/RAND_MAX);
     g_axes.AXIS_X +=  (100 + ((uint64_t)rand()*2*cnt)/RAND_MAX);
     g_axes.AXIS_Y += -(100 + ((uint64_t)rand()*4*cnt)/RAND_MAX);
     g_axes.AXIS_Z +=  (100 + ((uint64_t)rand()*6*cnt)/RAND_MAX);

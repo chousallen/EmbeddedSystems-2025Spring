@@ -28,7 +28,6 @@
 #include "hci_const.h"
 #include "bluenrg_aci_const.h"
 #include "bluenrg_gatt_aci.h"
-#include "main.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -158,13 +157,6 @@ void user_notify(void * pData)
         {
           evt_gatt_read_permit_req *pr = (void*)blue_evt->data;
           Read_Request_CB(pr->attr_handle);
-        }
-        break;
-
-      default:
-        {
-          evt_gatt_write_permit_req *wr = (void*)blue_evt->data;
-          Write_Request_CB(wr->attr_handle, wr->data_length, wr->data);
         }
         break;
       }

@@ -132,8 +132,6 @@ void Error_Handler(void);
 #define ISM43362_BOOT0_GPIO_Port GPIOB
 #define ISM43362_WAKEUP_Pin GPIO_PIN_13
 #define ISM43362_WAKEUP_GPIO_Port GPIOB
-#define LED2_Pin GPIO_PIN_14
-#define LED2_GPIO_Port GPIOB
 #define SPSGRF_915_SDN_Pin GPIO_PIN_15
 #define SPSGRF_915_SDN_GPIO_Port GPIOB
 #define INTERNAL_UART3_TX_Pin GPIO_PIN_8
@@ -164,6 +162,8 @@ void Error_Handler(void);
 #define LSM3MDL_DRDY_EXTI8_Pin GPIO_PIN_8
 #define LSM3MDL_DRDY_EXTI8_GPIO_Port GPIOC
 #define LSM3MDL_DRDY_EXTI8_EXTI_IRQn EXTI9_5_IRQn
+#define LED3_WIFI__LED4_BLE_Pin GPIO_PIN_9
+#define LED3_WIFI__LED4_BLE_GPIO_Port GPIOC
 #define SPBTLE_RF_RST_Pin GPIO_PIN_8
 #define SPBTLE_RF_RST_GPIO_Port GPIOA
 #define USB_OTG_FS_VBUS_Pin GPIO_PIN_9
@@ -222,9 +222,7 @@ void Error_Handler(void);
 #define ISM43362_DRDY_EXTI1_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
-extern int16_t acc_data[3];
-extern uint16_t update_interval;
-extern uint8_t test;
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

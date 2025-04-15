@@ -23,7 +23,6 @@
 #include "gatt_db.h"
 #include "bluenrg_conf.h"
 #include "bluenrg_gatt_aci.h"
-#include "main.h"
 
 /** @brief Macro that stores Value into a buffer in Little Endian Format (2 bytes)*/
 #define HOST_TO_LE_16(buf, val)    ( ((buf)[0] =  (uint8_t) (val)    ) , \
@@ -50,14 +49,13 @@ do {\
 /* Software Characteristics Service */
 #define COPY_SW_SENS_W2ST_SERVICE_UUID(uuid_struct)    COPY_UUID_128(uuid_struct,0x00,0x00,0x00,0x00,0x00,0x02,0x11,0xe1,0x9a,0xb4,0x00,0x02,0xa5,0xd5,0xc5,0x1b)
 #define COPY_QUATERNIONS_W2ST_CHAR_UUID(uuid_struct)   COPY_UUID_128(uuid_struct,0x00,0x00,0x01,0x00,0x00,0x01,0x11,0xe1,0xac,0x36,0x00,0x02,0xa5,0xd5,0xc5,0x1b)
-#define COPY_UPDATE_CHAR_UUID(uuid_struct) COPY_UUID_128(uuid_struct, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x00)
 
 uint16_t HWServW2STHandle, EnvironmentalCharHandle, AccGyroMagCharHandle;
-uint16_t SWServW2STHandle, QuaternionsCharHandle, UpdateCharHandle;
+uint16_t SWServW2STHandle, QuaternionsCharHandle;
 
 /* UUIDS */
 Service_UUID_t service_uuid;
-Char_UUID_t char_uuid, char_update_uuid;
+Char_UUID_t char_uuid;
 
 extern AxesRaw_t x_axes;
 extern AxesRaw_t g_axes;
@@ -121,7 +119,7 @@ tBleStatus Add_HWServW2ST_Service(void)
 tBleStatus Add_SWServW2ST_Service(void)
 {
   tBleStatus ret;
-  int32_t NumberOfRecords=2;
+  int32_t NumberOfRecords=1;
   uint8_t uuid[16];
 
   COPY_SW_SENS_W2ST_SERVICE_UUID(uuid);
@@ -137,7 +135,7 @@ tBleStatus Add_SWServW2ST_Service(void)
   BLUENRG_memcpy(&char_uuid.Char_UUID_128, uuid, 16);
   ret =  aci_gatt_add_char(SWServW2STHandle, UUID_TYPE_128, char_uuid.Char_UUID_128,
                            2+6*SEND_N_QUATERNIONS,
-                           CHAR_PROP_WRITE_WITHOUT_RESP,
+                           CHAR_PROP_NOTIFY,
                            ATTR_PERMISSION_NONE,
                            GATT_NOTIFY_READ_REQ_AND_WAIT_FOR_APPL_RESP,
                            16, 0, &QuaternionsCharHandle);
@@ -145,23 +143,6 @@ tBleStatus Add_SWServW2ST_Service(void)
   if (ret != BLE_STATUS_SUCCESS) {
     goto fail;
   }
-
-  /* update interval which is writable */
-  
-    COPY_UPDATE_CHAR_UUID(uuid);
-  BLUENRG_memcpy(&char_update_uuid.Char_UUID_128, uuid, 16);
-
-    ret = aci_gatt_add_char(SWServW2STHandle, UUID_TYPE_128, (uint8_t *)(char_update_uuid.Char_UUID_128),
-                           1,
-                           CHAR_PROP_WRITE_WITHOUT_RESP | CHAR_PROP_READ | CHAR_PROP_WRITE,
-                           ATTR_PERMISSION_NONE,
-                           GATT_NOTIFY_ATTRIBUTE_WRITE,
-                           16, 0, &UpdateCharHandle);
-
-  if (ret != BLE_STATUS_SUCCESS) {
-    goto fail;
-  }
-    
 
   return BLE_STATUS_SUCCESS;
 
@@ -261,7 +242,6 @@ tBleStatus Quat_Update(AxesRaw_t *data)
 *******************************************************************************/
 void Read_Request_CB(uint16_t handle)
 {
-    test = 2;
   tBleStatus ret;
 
   if(handle == AccGyroMagCharHandle + 1)
@@ -284,32 +264,6 @@ void Read_Request_CB(uint16_t handle)
       PRINTF("aci_gatt_allow_read() failed: 0x%02x\r\n", ret);
     }
   }
-}
-
-/*******************************************************************************
-* Function Name  : Write_Request_CB.
-* Description    : Update the sensor values.
-* Input          : Handle of the characteristic to update, length, data. 
-                   use (1+value)*10 ms as the update interval.
-* Return         : None.
-*******************************************************************************/
-void Write_Request_CB(uint16_t handle, uint8_t data_length, uint8_t *data)
-{
-    test = 1;
-    if (handle == UpdateCharHandle + 1) // Check if the written handle matches the characteristic
-    {
-        if (data_length > 0)
-        {
-            uint8_t attr_val[1];
-            uint16_t len;
-            aci_gatt_read_handle_value(handle, 1, &len, attr_val); // Read the value from the characteristic
-            test = attr_val[0];
-            PRINTF("Received value: %d\n", attr_val[0]);
-            update_interval = (attr_val[0] + 1) * 10; // Update the interval based on the written value
-            if (update_interval < 10) update_interval = 10; // Minimum 10ms
-            PRINTF("Update interval set to: %d ms\n", update_interval);
-        }
-    }
 }
 
 tBleStatus BlueMS_Environmental_Update(int32_t press, int16_t temp)
