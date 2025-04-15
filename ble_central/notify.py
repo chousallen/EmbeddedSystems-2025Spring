@@ -1,12 +1,12 @@
 import asyncio
 from bleak import BleakScanner, BleakClient
 
-# Define the target device name and the 16-bit service UUID
-TARGET_DEVICE_NAME = "Ping"  # Replace with your device's name
-SERVICE_UUID_16_BIT = "abcd"           # Replace with your 16-bit service UUID
+# Define the target device name and the 128-bit service UUID
+TARGET_DEVICE_NAME = "BlueNRG"  # Replace with your device's name
+SERVICE_UUID_128_BIT = "00000000-0001-11e1-9ab4-0002a5d5c51b"  # Replace with your 128-bit service UUID
 
 async def notification_handler(sender, data):
-    print(f"Notification from {sender}: {data}")
+    print(f"Notification from {sender}: {data.hex()}")
 
 async def main():
     # Step 1: Scan for the device by name.
@@ -29,18 +29,17 @@ async def main():
         for service in services:
             print(f"  [Service] {service.uuid}")
         
-        # Step 3: Select the service with the specified 16-bit UUID.
-        service_uuid = f"0000{SERVICE_UUID_16_BIT}-0000-1000-8000-00805f9b34fb"
-        service = services.get_service(service_uuid)
+        # Step 3: Select the service with the specified 128-bit UUID.
+        service = services.get_service(SERVICE_UUID_128_BIT)
         if not service:
-            print(f"Service with UUID {service_uuid} not found.")
+            print(f"Service with UUID {SERVICE_UUID_128_BIT} not found.")
             return
 
         print(f"Found service: {service.uuid}")
 
         # Instead of directly writing to the CCCD, use start_notify for the desired characteristic.
         # Replace `characteristic_uuid` with the UUID of the characteristic you wish to monitor.
-        characteristic_uuid = "1234"  # Set this to your target characteristic UUID
+        characteristic_uuid = "00e00000-0001-11e1-ac36-0002a5d5c51b"  # Set this to your target characteristic UUID
         await client.start_notify(characteristic_uuid, notification_handler)
         print("Notifications enabled via start_notify.")
 
