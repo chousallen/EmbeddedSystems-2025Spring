@@ -6,3 +6,4 @@
 **/.settings/
 .metadata/
 **/Debug/
+**/ble_list_utils.h/
