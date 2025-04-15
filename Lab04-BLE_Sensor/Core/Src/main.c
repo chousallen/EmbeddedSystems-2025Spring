@@ -644,7 +644,7 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osDelay(100);
   }
   /* USER CODE END 5 */
 }
@@ -662,7 +662,8 @@ void startBLE(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	  MX_BlueNRG_MS_Process();
+    osDelay(1000);
   }
   /* USER CODE END startBLE */
 }
