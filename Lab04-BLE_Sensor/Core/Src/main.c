@@ -23,7 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "b_l475e_iot01a2_accelero.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -95,7 +95,8 @@ void startACC(void *argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int16_t acc_data[3];
+uint8_t toggle = 0;
 /* USER CODE END 0 */
 
 /**
@@ -134,7 +135,7 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   MX_BlueNRG_MS_Init();
   /* USER CODE BEGIN 2 */
-
+  BSP_ACCELERO_Init();
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -679,7 +680,9 @@ void startACC(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	  BSP_ACCELERO_AccGetXYZ(acc_data);
+	  toggle = 1 - toggle;
+    osDelay(100);
   }
   /* USER CODE END startACC */
 }
