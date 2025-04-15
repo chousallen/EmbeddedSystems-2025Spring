@@ -34,7 +34,7 @@
 #include "bluenrg_gatt_aci.h"
 #include "bluenrg_hal_aci.h"
 #include "sm.h"
-//#include "stm32l4xx_hal_tim.h"
+#include "stm32l4xx_hal_tim.h"
 
 /* USER CODE BEGIN Includes */
 #include "role_type.h"
