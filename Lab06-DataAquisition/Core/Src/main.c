@@ -33,7 +33,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define BUFF_LEN 10
+#define MSG_LEN 64
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -57,9 +58,9 @@ const osThreadAttr_t logadcTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
-uint16_t temp[1];
-uint8_t conv_cplt = 0;
-uint8_t msg[64];
+uint16_t temp[BUFF_LEN];
+uint8_t half_cplt = 0, conv_cplt = 0;
+uint8_t msg[MSG_LEN];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -116,7 +117,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   strcpy((char*)msg, "Hello!\n");
   HAL_UART_Transmit(&huart1, msg, 64, 10);
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)temp, 1);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)temp, BUFF_LEN);
   HAL_TIM_Base_Start(&htim1);
   /* USER CODE END 2 */
 
@@ -612,6 +613,14 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 		conv_cplt = 1;
 	}
 }
+
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc)
+{
+	if(hadc == &hadc1)
+	{
+		half_cplt = 1;
+	}
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_startLogadc */
@@ -629,9 +638,25 @@ void startLogadc(void *argument)
   {
 	  if(conv_cplt)
 	  {
-		  sprintf((char*)msg, "adc1 value: %d\n", temp[0]);
-		  HAL_UART_Transmit(&huart1, msg, 64, 10);
+		  sprintf((char*)msg, "Bottom half filled\n");
+		  HAL_UART_Transmit(&huart1, msg, strlen((char*)msg), 10);
+		  for(uint16_t* p = temp+BUFF_LEN/2; p < temp+BUFF_LEN; p++)
+		  {
+			  sprintf((char*)msg, "ADC value: %d\n", *p);
+			  HAL_UART_Transmit(&huart1, msg, strlen((char*)msg), 10);
+		  }
 		  conv_cplt = 0;
+	  }
+	  if(half_cplt)
+	  {
+		  sprintf((char*)msg, "Top half filled\n");
+		  HAL_UART_Transmit(&huart1, msg, strlen((char*)msg), 10);
+		  for(uint16_t* p = temp; p < temp+BUFF_LEN/2; p++)
+		  {
+			  sprintf((char*)msg, "ADC value: %d\n", *p);
+			  HAL_UART_Transmit(&huart1, msg, strlen((char*)msg), 10);
+		  }
+		  half_cplt = 0;
 	  }
     osDelay(1);
   }
