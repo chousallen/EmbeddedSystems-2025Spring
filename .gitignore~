@@ -1,9 +1,0 @@
-**/.vscode/
-**/.DS_Store
-**/build/
-**/Drivers/
-**/Middlewares/
-**/.settings/
-.metadata/
-**/Debug/
-Lab04-BLE_Sensor/X-CUBE-MEMS1/Target/sensor_unicleo_id.h/
