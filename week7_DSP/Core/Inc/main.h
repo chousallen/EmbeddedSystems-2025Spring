@@ -32,6 +32,8 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "stm32l475e_iot01_accelero.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
