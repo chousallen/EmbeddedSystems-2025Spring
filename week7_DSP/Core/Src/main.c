@@ -59,6 +59,8 @@ UART_HandleTypeDef huart1;
 int16_t pDataXYZ[3];
 float raw_data_buff[32];
 float filtered_buff[32];
+float raw_plot[512];
+float filtered_plot[512];
 
 /* -------------------------------------------------------------------
  * The input signal and reference output (computed with MATLAB)
@@ -100,6 +102,7 @@ uint32_t blockSize = BLOCK_SIZE;
 uint32_t numBlocks = TEST_LENGTH_SAMPLES/BLOCK_SIZE;
 
 float32_t  snr;
+int plot_flag = 0;
 
 /* USER CODE END PV */
 
@@ -586,6 +589,13 @@ int main(void)
 //	  BSP_ACCELERO_AccGetXYZ(pDataXYZ);
 //	  printf("HI\n");
 	  arm_fir_f32(&S, raw_data_buff, filtered_buff, blockSize);
+	  if(plot_flag < 16){
+		  for(int j = 0; j<32; ++j){
+			  raw_plot[plot_flag * 32 + j] = raw_data_buff[j];
+			  filtered_plot[plot_flag * 32 + j] = filtered_buff[j];
+		  }
+		  ++plot_flag;
+	  }
 
 //	  HAL_Delay(100);
   }
